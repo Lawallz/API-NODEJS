@@ -8,9 +8,19 @@ generator client {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  nome      String
-  email     String   @unique
-  senha     String
-  createdAt DateTime @default(now())
+  id       Int      @id @default(autoincrement())
+  name     String
+  email    String   @unique
+  password String
+  carts    Cart[]
 }
+
+model Cart {
+  id        Int    @id @default(autoincrement())
+  userId    Int
+  product   String
+  quantity  Int
+
+  user User @relation(fields: [userId], references: [id])
+}
+

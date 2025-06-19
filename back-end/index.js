@@ -1,15 +1,26 @@
-
 const express = require('express');
 const app = express();
-const PORT = 3000;
+const port = 3000;
 
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('API está funcionando! 🚀');
-});
+const userController = require('./controllers/userController');
+const cartController = require('./controllers/cartController');
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+// Rotas Usuário
+app.get('/users', userController.getAllUsers);
+app.get('/users/:id', userController.getUserById);
+app.post('/users', userController.createUser);
+app.put('/users/:id', userController.updateUser);
+app.delete('/users/:id', userController.deleteUser);
 
+// Rotas Carrinho
+app.get('/carts', cartController.getAllCarts);
+app.get('/carts/:id', cartController.getCartById);
+app.post('/carts', cartController.createCart);
+app.put('/carts/:id', cartController.updateCart);
+app.delete('/carts/:id', cartController.deleteCart);
+
+app.listen(port, () => {
+  console.log(`API rodando em http://localhost:${port}`);
+});
