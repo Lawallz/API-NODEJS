@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Meu Carrinho - Anelkar</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+
+  <div class="top-bar">
+    <span>ANELKAR DESDE 1993</span>
+  </div>
+
+  <header class="header">
+    <div class="logo">
+      <img src="https://cdn.awsli.com.br/400x300/1716/1716838/logo/ffa8004d-0493-4b99-9d82-144760009294-4uifxndce6.jpg" alt="Anelkar Logo" />
+    </div>
+    <div class="search-bar">
+      <input type="text" placeholder="Digite o que você procura" />
+      <button><i class="fas fa-search"></i></button>
+    </div>
+    <div class="social-icons">
+      <a href="#"><i class="fab fa-facebook-f"></i></a>
+      <a href="#"><i class="fab fa-youtube"></i></a>
+      <a href="#"><i class="fab fa-tiktok"></i></a>
+      <a href="#"><i class="fab fa-whatsapp"></i></a>
+      <a href="index.html"><i class="fas fa-arrow-left"></i> Continuar Comprando</a>
+    </div>
+  </header>
+
+  <main class="content">
+    <h1>Seu Carrinho</h1>
+    <div class="carrinho-container" id="lista-carrinho"></div>
+    <div class="total" id="total"></div>
+    <button id="finalizar-compra" class="btn-finalizar">Finalizar Compra</button>
+  </main>
+
+  <script>
+    // para carregar itens do carrinho
+    function carregarCarrinho() {
+      fetch('http://localhost:3000/carrinho')
+        .then(response => response.json())
+        .then(itens => {
+          const lista = document.getElementById('lista-carrinho');
+          let total = 0;
+          lista.innerHTML = '';
+
+          if (itens.length === 0) {
+            lista.innerHTML = "<p>Seu carrinho está vazio.</p>";
+          } else {
+            itens.forEach(item => {
+              const subtotal = item.preco * item.quantity;
+              total += subtotal;
+
+              const div = document.createElement('div');
+              div.classList.add('item-carrinho');
+              div.dataset.id = item.id;
+              div.innerHTML = `
+                <div class="info-produto">
+                  <span>${item.product}</span>
+                  <span class="preco">R$ ${item.preco.toFixed(2)}</span>
+                </div>
+                <div class="controles">
+                  <button class="btn-quantidade" onclick="alterarQuantidade(${item.id}, -1)">-</button>
+                  <span class="quantidade">${item.quantity}</span>
+                  <button class="btn-quantidade" onclick="alterarQuantidade(${item.id}, 1)">+</button>
+                  <button class="btn-remover" onclick="removerItem(${item.id})">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+                <div class="subtotal">R$ ${subtotal.toFixed(2)}</div>
+              `;
+              lista.appendChild(div);
+            });
+
+            document.getElementById('total').innerHTML = `
+              <strong>Total: R$ ${total.toFixed(2)}</strong>
+            `;
+          }
+        })
+        .catch(() => {
+          document.getElementById('lista-carrinho').innerHTML = "<p>Erro ao carregar o carrinho.</p>";
+        });
+    }
+
+    // para remover item
+    async function removerItem(id) {
+      try {
+        const response = await fetch(`http://localhost:3000/carrinho/${id}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          carregarCarrinho();
+        } else {
+          alert('Erro ao remover item!');
+        }
+      } catch (error) {
+        alert('Erro ao remover item!');
+      }
+    }
+
+    // funcao para alterar a quantidade de itens ja dentro do carrinho
+   async function alterarQuantidade(id, delta) {
+  try {
+    // Pega a quantidade atual direto do HTML
+    const quantidadeElemento = document.querySelector(`.item-carrinho[data-id="${id}"] .quantidade`);
+    const quantidadeAtual = parseInt(quantidadeElemento.textContent);
+    const novaQuantidade = quantidadeAtual + delta;
+
+    if (novaQuantidade < 1) {
+      removerItem(id);
+      return;
+    }
+
+    // Faz o PUT apenas com o campo quantity
+    const updateResponse = await fetch(`http://localhost:3000/carrinho/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        quantity: novaQuantidade
+      })
+    });
+
+    if (!updateResponse.ok) {
+      const erro = await updateResponse.json();
+      throw new Error(erro.message || 'Erro ao atualizar item');
+    }
+
+    carregarCarrinho();
+  } catch (error) {
+    console.error('Erro ao atualizar quantidade:', error);
+    alert('Erro ao atualizar quantidade!');
+  }
+}
+
+
+    // vai finalizar a compra deletando o que ta no carrinho (todos os itens)
+    document.getElementById('finalizar-compra').addEventListener('click', () => {
+      fetch('http://localhost:3000/carrinho', {
+        method: 'DELETE'
+      })
+      .then(response => {
+        if (response.ok) {
+          alert('Compra finalizada com sucesso!');
+          carregarCarrinho();
+        } else {
+          alert('Erro ao finalizar compra!');
+        }
+      });
+    });
+
+    // Chama a funcao de carregar o carrinho enquanto a pagina abre
+    carregarCarrinho();
+  </script>
+
+</body>
+</html>

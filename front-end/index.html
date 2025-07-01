@@ -7,16 +7,14 @@
   <link rel="stylesheet" href="css/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto&display=swap">
-  <script src="https://kit.fontawesome.com/a2e0b4f28e.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-  
-  
+
   <div class="top-bar">
     <span>ANELKAR DESDE 1993</span>
   </div>
 
-  
   <header class="header">
     <div class="logo">
       <img src="https://cdn.awsli.com.br/400x300/1716/1716838/logo/ffa8004d-0493-4b99-9d82-144760009294-4uifxndce6.jpg" alt="Anelkar Logo" />
@@ -30,27 +28,183 @@
       <a href="#"><i class="fab fa-youtube"></i></a>
       <a href="#"><i class="fab fa-tiktok"></i></a>
       <a href="#"><i class="fab fa-whatsapp"></i></a>
-      <a href="#"><i class="fas fa-shopping-cart"></i> Meu Orçamento</a>
+      <a href="carrinho.html" id="carrinho-link" class="carrinho-link">
+      <div class="cart-wrapper">
+      <i class="fas fa-shopping-cart"></i>
+    <span id="contador-carrinho" class="contador">0</span>
+  </div>
+  Meu Carrinho
+</a>
     </div>
+    <div class="user-welcome" id="user-welcome"></div>
   </header>
 
-
-  <nav class="main-nav">
-    <a href="#">ANEL / PISTÃO COLAR</a>
-    <a href="#">ANEL / PISTÃO EIXO</a>
-    <a href="#">ANEL ORING (VITON)</a>
-    <a href="#">ARRUELA</a>
-    <a href="#">CARCAÇA CENTRAL</a>
-    <a href="#">COLAR</a>
-    <a href="#">DEFLETOR</a>
-    <a href="#">OUTRAS</a>
-  </nav>
-
-  
   <main class="content">
     <h1>Bem-vindo à Anelkar</h1>
     <p>Veja nossos kits de reparo para turbinas!</p>
-    
+
+    <section class="catalogo">
+      <div class="produto">
+        <img src="https://cdn.awsli.com.br/600x1000/1716/1716838/produto/156435330/copia-de-copia-de-copia-de-www-anelkar-com-br-2023-03-23t123729-700-gunnzj.jpg" alt="Produto A">
+        <h3>MANCAL RADIAL TO4</h3>
+        <p>R$ 250,00</p>
+        <button onclick="adicionarAoCarrinho('MANCAL RADIAL TO4', 250)">
+          <i class="fas fa-cart-plus"></i> Adicionar
+        </button>
+      </div>
+
+      <div class="produto">
+        <img src="https://cdn.awsli.com.br/600x1000/1716/1716838/produto/135143356/mancal-de-encosto-k27-k24-k26---mb-1933-2533-of1730-2831-0500m-r1630-1730-mgl2ccoclh.png" alt="Produto B">
+        <h3>MANCAL DE ENCOSTO K24/K27</h3>
+        <p>R$ 350,00</p>
+        <button onclick="adicionarAoCarrinho('MANCAL DE ENCOSTO K24/K27', 350)">
+          <i class="fas fa-cart-plus"></i> Adicionar
+        </button>
+      </div>
+
+      <div class="produto">
+        <img src="https://cdn.awsli.com.br/600x1000/1716/1716838/produto/134752817/copia-de-copia-de-copia-de-www-anelkar-com-br-2023-04-15t162114-123-czyqru.jpg" alt="Produto C">
+        <h3>ESPAÇADOR HC5A</h3>
+        <p>R$ 450,00</p>
+        <button onclick="adicionarAoCarrinho('ESPAÇADOR HC5A', 450)">
+          <i class="fas fa-cart-plus"></i> Adicionar
+        </button>
+      </div>
+    </section>
+
+    <section id="usuarios">
+      <h2>Gerenciar Usuários</h2>
+      <form id="form-usuario">
+        <input type="hidden" id="usuario-id" />
+        <input type="text" id="nome" placeholder="Nome" required />
+        <input type="email" id="email" placeholder="Email" required />
+        <input type="password" id="senha" placeholder="Senha" required />
+        <button type="submit">Salvar Usuário</button>
+      </form>
+
+      <table id="tabela-usuarios">
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </section>
   </main>
+
+  <script>
+    async function adicionarAoCarrinho(nome, preco) { //cria função assync chamada add ao carrinho, que vai ter nome e preço passado 
+      try {
+        const response = await fetch('http://localhost:3000/carrinho', { // chama a api na rota carrinho
+          method: 'POST', // faz o envio de dados ao server
+          headers: { 
+            'Content-Type': 'application/json' //mandando no formato json
+          },
+          body: JSON.stringify({ product: nome, preco: preco, quantity: 1 }) // ta convertendo o nome, preço e quantidade em json
+        });
+
+        if (response.ok) {
+          atualizarContadorCarrinho();
+          alert('Item adicionado ao carrinho!'); // se a resposta for ok, ele vai atualizar op contador do carrinho mostrando a mensagem
+        } else {
+          alert('Erro ao adicionar item.');  // caso nao seja ok, vai dar erro
+        }
+      } catch (error) { 
+        console.error('Erro:', error);
+        alert('Erro ao adicionar item.'); // erros especificos como server fora do ar
+      }
+    }
+
+    async function atualizarContadorCarrinho() { // func async pra atualizar o contador 
+      try {
+        const response = await fetch('http://localhost:3000/carrinho'); // retorna tudo dentro de /carrinho
+        const itens = await response.json(); // guardo a resposta de json para objeto chamado itens
+        const contador = document.getElementById('contador-carrinho'); // pega o elemento HTML com o ID
+        if (contador) contador.textContent = itens.length; // att para quantidade de itens
+      } catch (error) {
+        console.error('Erro ao atualizar contador:', error); // se der algum erro, vai mostrar a mensagem no console
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      atualizarContadorCarrinho(); // chama a função (bolinha de qtd)
+
+      const user = JSON.parse(localStorage.getItem('usuarioLogado')); // pega o user q foi salvo dentro do localstorage e transforma de objeto (get item) para json (json.parse)
+      const div = document.getElementById('user-welcome'); // 
+      if (user) {
+        div.innerHTML = `👋 Olá, <strong>${user.name}</strong>! <button onclick="logout()">Sair</button>`;
+      } else {
+        div.innerHTML = `<a href="login.html">Entrar</a> | <a href="cadastro.html">Cadastrar</a>`;
+      }
+
+      carregarUsuarios();
+    });
+
+    function logout() {
+      localStorage.removeItem('usuarioLogado');
+      location.reload();
+    }
+
+    async function carregarUsuarios() {
+      const resposta = await fetch('http://localhost:3000/users');
+      const usuarios = await resposta.json();
+
+      const tbody = document.querySelector('#tabela-usuarios tbody');
+      tbody.innerHTML = '';
+
+      usuarios.forEach(usuario => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${usuario.name}</td>
+          <td>${usuario.email}</td>
+          <td>
+            <button onclick="editarUsuario(${usuario.id}, '${usuario.name}', '${usuario.email}')">Editar</button>
+            <button onclick="deletarUsuario(${usuario.id})">Excluir</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    async function salvarUsuario(event) {
+      event.preventDefault();
+      const id = document.getElementById('usuario-id').value;
+      const name = document.getElementById('nome').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('senha').value;
+
+      const dados = { name, email, password };
+      const url = id ? `http://localhost:3000/users/${id}` : 'http://localhost:3000/users';
+      const metodo = id ? 'PUT' : 'POST';
+
+      await fetch(url, {
+        method: metodo,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(dados)
+      });
+
+      document.getElementById('form-usuario').reset();
+      carregarUsuarios();
+    }
+
+    function editarUsuario(id, nome, email) {
+      document.getElementById('usuario-id').value = id;
+      document.getElementById('nome').value = nome;
+      document.getElementById('email').value = email;
+    }
+
+    async function deletarUsuario(id) {
+      if (confirm('Deseja excluir este usuário?')) {
+        await fetch(`http://localhost:3000/users/${id}`, { method: 'DELETE' });
+        carregarUsuarios();
+      }
+    }
+
+    document.getElementById('form-usuario').addEventListener('submit', salvarUsuario);
+  </script>
+
 </body>
 </html>

@@ -5,19 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Cadastro - Anelkar</title>
   <link rel="stylesheet" href="css/auth.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto&display=swap">
 </head>
 <body>
   <div class="auth-container">
     <h2>Cadastro</h2>
     <form id="registerForm">
-      <input type="text" placeholder="Nome completo" required />
-      <input type="email" placeholder="E-mail" required />
-      <input type="password" placeholder="Senha" required />
+      <input type="text" id="nome" placeholder="Nome completo" required />
+      <input type="email" id="email" placeholder="E-mail" required />
+      <input type="password" id="senha" placeholder="Senha" required />
       <button type="submit">Cadastrar</button>
       <p>Já tem uma conta? <a href="login.html">Faça login</a></p>
     </form>
   </div>
+  
+  <script>
+    document.getElementById('registerForm').addEventListener('submit', async (e) => { // seleciono o formulario pelo ID (registerForm) e seleciono um ouvinte de evento para o submit, executando uma func assincrona qnd é enviado
+      e.preventDefault(); // nao envia o formulario somente recarregando a pagina
+
+      // pego os valores que ta dentro de nopme email e senha
+      const name = document.getElementById('nome').value;
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('senha').value;
+
+      const response = await fetch('http://localhost:3000/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password })
+      });
+
+
+      // CASO O LOCAL STORAGE SALVE O USER, ABRIR A PAGINA PRINCIPAL
+      const user = await response.json(); //Aqui, pego a resposta da API (que deve conter os dados do usuário recém-criado) e converto para objeto JavaScript com .json().
+      localStorage.setItem('usuarioLogado', JSON.stringify(user)); // salvo no localstorage
+      window.location.href = 'index.html'; // direciono para index.html
+    });
+  </script>
 </body>
 </html>

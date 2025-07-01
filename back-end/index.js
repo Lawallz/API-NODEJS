@@ -1,9 +1,14 @@
 const express = require('express');
+const path = require('path');
 const app = express();
 const port = 3000;
 
 app.use(express.json());
 
+// Servir arquivos estáticos do front-end
+app.use(express.static(path.join(__dirname, '../front-end')));
+
+// importação dos controllers
 const userController = require('./controllers/userController');
 const cartController = require('./controllers/cartController');
 
@@ -15,11 +20,15 @@ app.put('/users/:id', userController.updateUser);
 app.delete('/users/:id', userController.deleteUser);
 
 // Rotas Carrinho
-app.get('/carts', cartController.getAllCarts);
-app.get('/carts/:id', cartController.getCartById);
-app.post('/carts', cartController.createCart);
-app.put('/carts/:id', cartController.updateCart);
-app.delete('/carts/:id', cartController.deleteCart);
+app.get('/carrinho', cartController.getCart);
+app.post('/carrinho', cartController.addToCart);
+app.put('/carrinho/:id', cartController.updateCart);
+app.delete('/carrinho/:id', cartController.deleteCart);
+app.delete('/carrinho', cartController.clearCart); // Rota para limpar todo o carrinho
+
+// Rotas adicionais 
+app.get('/carts', cartController.getCart);
+app.post('/carts', cartController.addToCart);
 
 app.listen(port, () => {
   console.log(`API rodando em http://localhost:${port}`);

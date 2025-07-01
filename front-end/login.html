@@ -5,18 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login - Anelkar</title>
   <link rel="stylesheet" href="css/auth.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Roboto&display=swap">
 </head>
 <body>
   <div class="auth-container">
     <h2>Login</h2>
     <form id="loginForm">
-      <input type="email" placeholder="E-mail" required />
-      <input type="password" placeholder="Senha" required />
+      <input type="email" id="email" placeholder="E-mail" required />
+      <input type="password" id="senha" placeholder="Senha" required />
       <button type="submit">Entrar</button>
       <p>Não tem uma conta? <a href="cadastro.html">Cadastre-se</a></p>
     </form>
   </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const senha = document.getElementById('senha').value;
+
+      const response = await fetch('http://localhost:3000/users');
+      const users = await response.json();
+
+      const user = users.find(u => u.email === email && u.password === senha);
+
+      if (user) {
+        localStorage.setItem('usuarioLogado', JSON.stringify(user));
+        window.location.href = 'index.html';
+      } else {
+        alert('E-mail ou senha inválidos!');
+      }
+    });
+  </script>
 </body>
 </html>
